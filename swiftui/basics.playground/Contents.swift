@@ -5,7 +5,12 @@ import PlaygroundSupport
 
 struct BasicView: View {
     var body: some View {
-        Text("Hello World")
+        VStack {
+            Text("Hello World")
+                .padding()
+                .foregroundColor(.white)
+                .background(Color.black)
+        }
     }
 }
 
