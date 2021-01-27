@@ -31,8 +31,8 @@ class SerialAsyncTestMultiStep {
     let originalValue = [1, 2, 3, 4, 5]
     lazy var value = originalValue
 
-    func touchTheResource(task: Int) {
-        print("task \(task) - \(value)")
+    func touchTheResource(task: Int, name: String) {
+        print("\(name) - task \(task) - \(value)")
         
         // multistep swap operation (not xor swap shh)
         let oldValAt0 = value[0]
@@ -44,25 +44,25 @@ class SerialAsyncTestMultiStep {
         value[3] = oldValAt1
     }
 
-    func scheduleAsyncTask(delay: TimeInterval = 0.0, task: Int, playDirty: Bool = false) {
+    func scheduleAsyncTask(delay: TimeInterval = 0.0, task: Int, name: String, playDirty: Bool = false) {
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + delay) {
-            self.touchTheResource(task: task)
+            self.touchTheResource(task: task, name: name)
         }
         
         guard playDirty else { return }
-        touchTheResource(task: task)
+        touchTheResource(task: task, name: name)
     }
     
     func test1() {
-        [0.1, 0.2, 0.3, 0.0, 0.1, 0.0].enumerated().forEach { scheduleAsyncTask(delay: $0.element, task: $0.offset) }
+        [0.1, 0.2, 0.3, 0.0, 0.1, 0.0].enumerated().forEach { scheduleAsyncTask(delay: $0.element, task: $0.offset, name: #function) }
     }
     
     func test2() {
-        [0.1, 0.2, 0.3, 0.0, 0.1, 0.0].enumerated().forEach { scheduleAsyncTask(delay: $0.element, task: $0.offset, playDirty: true) }
+        [0.1, 0.0, 0.1, 0.0, 0.1, 0.0].enumerated().forEach { scheduleAsyncTask(delay: $0.element, task: $0.offset, name: #function, playDirty: true) }
     }
 }
 
-//let serialAsyncTestSingleStep = SerialAsyncTestSingleStep()
+let serialAsyncTestSingleStep = SerialAsyncTestSingleStep()
 /*
  Output
  task 3 - 0
@@ -94,32 +94,55 @@ class SerialAsyncTestMultiStep {
 let serialAsyncTestMultiStep = SerialAsyncTestMultiStep()
 /*
  Output
- task 3 - [1, 2, 3, 4, 5]
- task 5 - [5, 4, 3, 2, 1]
- task 0 - [1, 2, 3, 4, 5]
- task 4 - [5, 4, 3, 2, 1]
- task 1 - [1, 2, 3, 4, 5]
- task 2 - [5, 4, 3, 2, 1]
+ test1() - task 3 - [1, 2, 3, 4, 5]
+ test1() - task 5 - [5, 4, 3, 2, 1]
+ test1() - task 0 - [1, 2, 3, 4, 5]
+ test1() - task 4 - [5, 4, 3, 2, 1]
+ test1() - task 1 - [1, 2, 3, 4, 5]
+ test1() - task 2 - [5, 4, 3, 2, 1]
  */
-serialAsyncTestMultiStep.test1()
+//serialAsyncTestMultiStep.test1()
 
 /*
  Output
- task 0 - [1, 2, 3, 4, 5]
- task 1 - [5, 4, 3, 2, 1]
- task 2 - [1, 2, 3, 4, 5]
- task 3 - [5, 4, 3, 2, 1]
- task 4 - [1, 2, 3, 4, 5]
- task 5 - [5, 4, 3, 2, 1]
- task 3 - [1, 2, 3, 4, 5]
- task 5 - [5, 4, 3, 2, 1]
- task 0 - [1, 2, 3, 4, 5]
- task 4 - [5, 4, 3, 2, 1]
- task 1 - [1, 2, 3, 4, 5]
- task 2 - [5, 4, 3, 2, 1]
+ test2() - task 0 - [1, 2, 3, 4, 5]
+ test2() - task 1 - [5, 4, 3, 2, 1]
+ test2() - task 2 - [1, 2, 3, 4, 5]
+ test2() - task 3 - [5, 4, 3, 2, 1]
+ test2() - task 4 - [1, 2, 3, 4, 5]
+ test2() - task 5 - [5, 4, 3, 2, 1]
+ test2() - task 1 - [1, 2, 3, 4, 5]
+ test2() - task 3 - [5, 4, 3, 2, 1]
+ test2() - task 5 - [1, 2, 3, 4, 5]
+ test2() - task 0 - [5, 4, 3, 2, 1]
+ test2() - task 2 - [1, 2, 3, 4, 5]
+ test2() - task 4 - [5, 4, 3, 2, 1]
  */
-//serialAsyncTestMultiStep.test2()
+serialAsyncTestMultiStep.test2()
 
+/*
+ Output
+ test2() - task 0 - [1, 2, 3, 4, 5]
+ test2() - task 1 - [5, 4, 3, 2, 1]
+ test2() - task 2 - [1, 2, 3, 4, 5]
+ test2() - task 3 - [5, 4, 3, 2, 1]
+ test2() - task 4 - [1, 2, 3, 4, 5]
+ test2() - task 5 - [5, 4, 3, 2, 1]
+ test1() - task 3 - [1, 2, 3, 4, 5]
+ test1() - task 5 - [5, 4, 3, 2, 1]
+ test2() - task 1 - [1, 2, 3, 4, 5]
+ test2() - task 3 - [5, 4, 3, 2, 1]
+ test2() - task 5 - [1, 2, 3, 4, 5]
+ test1() - task 0 - [5, 4, 3, 2, 1]
+ test1() - task 4 - [1, 2, 3, 4, 5]
+ test2() - task 0 - [5, 4, 3, 2, 1]
+ test2() - task 2 - [1, 2, 3, 4, 5]
+ test2() - task 4 - [5, 4, 3, 2, 1]
+ test1() - task 1 - [1, 2, 3, 4, 5]
+ test1() - task 2 - [5, 4, 3, 2, 1]
+ */
+//serialAsyncTestMultiStep.test1()
+//serialAsyncTestMultiStep.test2()
 
 PlaygroundPage.current.needsIndefiniteExecution = true
 
