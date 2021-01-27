@@ -31,8 +31,8 @@ class SerialAsyncTestMultiStep {
     let originalValue = [1, 2, 3, 4, 5]
     lazy var value = originalValue
 
-    func touchTheResource(task: Int, name: String) {
-        print("\(name) - task \(task) - \(value)")
+    func touchTheResource(delay: TimeInterval, task: Int, name: String) {
+        print("\(name) - delay \(delay) - task \(task) - \(value)")
         
         // multistep swap operation (not xor swap shh)
         let oldValAt0 = value[0]
@@ -46,11 +46,11 @@ class SerialAsyncTestMultiStep {
 
     func scheduleAsyncTask(delay: TimeInterval = 0.0, task: Int, name: String, playDirty: Bool = false) {
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + delay) {
-            self.touchTheResource(task: task, name: name)
+            self.touchTheResource(delay: delay, task: task, name: name)
         }
         
         guard playDirty else { return }
-        touchTheResource(task: task, name: name)
+        touchTheResource(delay: delay, task: task, name: name + " - dirty")
     }
     
     func test1() {
@@ -118,7 +118,7 @@ let serialAsyncTestMultiStep = SerialAsyncTestMultiStep()
  test2() - task 2 - [1, 2, 3, 4, 5]
  test2() - task 4 - [5, 4, 3, 2, 1]
  */
-serialAsyncTestMultiStep.test2()
+//serialAsyncTestMultiStep.test2()
 
 /*
  Output
@@ -141,8 +141,8 @@ serialAsyncTestMultiStep.test2()
  test1() - task 1 - [1, 2, 3, 4, 5]
  test1() - task 2 - [5, 4, 3, 2, 1]
  */
-//serialAsyncTestMultiStep.test1()
-//serialAsyncTestMultiStep.test2()
+serialAsyncTestMultiStep.test1()
+serialAsyncTestMultiStep.test2()
 
 PlaygroundPage.current.needsIndefiniteExecution = true
 
