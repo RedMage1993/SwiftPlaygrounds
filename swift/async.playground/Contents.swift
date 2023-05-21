@@ -5,16 +5,20 @@ import PlaygroundSupport
 
 PlaygroundPage.current.needsIndefiniteExecution = true
 
-struct A {
-    func myPublisher() -> AnyPublisher<String, Never> {
-        Just("Hello, World!")
-            .eraseToAnyPublisher()
+func testAsyncTask() async {
+    do {
+        print("\(#function) in progress")
+        try await Task.sleep(for: .seconds(3))
+    } catch {
+        print("oops!")
     }
 }
 
-let a = A()
-var cancellables = Set<AnyCancellable>()
+print("starting task")
 
-a.myPublisher().sink { value in
-    print(value)
-}.store(in: &cancellables)
+Task {
+    await testAsyncTask()
+    print("done")
+}
+
+print("task started")
